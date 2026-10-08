@@ -9,13 +9,16 @@ import com.faculdade.solid.dominio.ReciboPagamento;
 public class PedidoService {
     private final RepositorioPedido repositorio;
     private final PoliticaDesconto politicaDesconto;
+    private final MetodoPagamento pagamento;
 
-    public PedidoService(RepositorioPedido repositorio, PoliticaDesconto politicaDesconto) {
+    public PedidoService(RepositorioPedido repositorio, PoliticaDesconto politicaDesconto,
+                         MetodoPagamento pagamento) {
         this.repositorio = repositorio;
         this.politicaDesconto = politicaDesconto;
+        this.pagamento = pagamento;
     }
 
-    public ReciboPagamento processar(Pedido pedido, MetodoPagamento pagamento) {
+    public ReciboPagamento processar(Pedido pedido) {
         ReciboPagamento recibo = pagamento.pagar(politicaDesconto.aplicar(pedido.getTotal()));
         pedido.marcarComoPago();
         repositorio.salvar(pedido);

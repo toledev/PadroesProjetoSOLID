@@ -11,9 +11,9 @@ O domínio de checkout foi escolhido por possuir comportamentos que podem variar
 - Cadastro de cliente, produto, item de pedido e pedido.
 - Cálculo automático do valor total do pedido.
 - Aplicação de uma política de desconto de 10%.
-- Pagamento por Pix ou cartão.
+- Simulação de pagamento por Pix ou cartão.
 - Salvamento de pedidos em memória.
-- Notificação por WhatsApp ou e-mail.
+- Simulação de notificação por WhatsApp ou e-mail no console.
 
 ## Estrutura do projeto
 
@@ -38,7 +38,7 @@ Cada classe possui uma responsabilidade bem definida. As entidades representam o
 
 ### Open/Closed Principle (OCP)
 
-O sistema permite incluir novos comportamentos sem alterar os serviços centrais. Caso seja necessário adicionar pagamento por boleto, por exemplo, basta criar uma classe `PagamentoBoleto` que implemente `MetodoPagamento`. O mesmo vale para novos canais de notificação e políticas de desconto.
+O sistema permite incluir novos comportamentos sem alterar os serviços centrais. Caso seja necessário adicionar pagamento em dinheiro, por exemplo, basta criar uma classe `PagamentoDinheiro` que implemente `MetodoPagamento` e simule o recebimento, retornando um recibo. O mesmo vale para novos canais de notificação e políticas de desconto.
 
 ### Liskov Substitution Principle (LSP)
 
@@ -50,7 +50,9 @@ As interfaces foram separadas por responsabilidade: `MetodoPagamento`, `CanalNot
 
 ### Dependency Inversion Principle (DIP)
 
-Os serviços dependem de abstrações, e não de implementações concretas. O `PedidoService` recebe `RepositorioPedido` e `PoliticaDesconto` pelo construtor e recebe `MetodoPagamento` ao processar o pedido. O `NotificacaoService` recebe `CanalNotificacao` pelo construtor. As implementações concretas são criadas somente no `Main`, onde ocorre a injeção manual das dependências.
+Os serviços dependem de abstrações para seus colaboradores. O `PedidoService` recebe `RepositorioPedido`, `PoliticaDesconto` e `MetodoPagamento` pelo construtor. O `NotificacaoService` recebe `CanalNotificacao` pelo construtor. O `Main` cria e injeta essas implementações manualmente, conforme o enunciado do trabalho.
+
+São criadas duas instâncias de `PedidoService`: uma configurada com Pix e outra com cartão. Ambas usam o mesmo repositório. O método `processar(pedido)` utiliza o pagamento recebido na construção, sem escolher tipos com `if`, `switch` ou `instanceof`.
 
 ## Cenários executados
 
@@ -63,7 +65,7 @@ Nos dois casos, o pedido é salvo e o valor final considera o desconto de 10%.
 
 ## Como executar
 
-É necessário ter o JDK instalado. No PowerShell, dentro da pasta do projeto, execute:
+É necessário ter o JDK 11 ou superior instalado. No PowerShell, dentro da pasta do projeto, execute:
 
 ```powershell
 javac -encoding UTF-8 -d out (Get-ChildItem -Recurse -Path src\main\java -Filter *.java | ForEach-Object { $_.FullName })
@@ -72,5 +74,5 @@ java -cp out com.faculdade.solid.Main
 
 ## Possível extensão
 
-Para adicionar uma nova forma de pagamento, deve-se criar uma classe que implemente a interface `MetodoPagamento` e utilizar essa implementação no `Main`. Não é necessário alterar o `PedidoService`, pois ele já trabalha com a abstração. Essa extensão demonstra diretamente o princípio Open/Closed.
+Para adicionar uma nova forma de pagamento, deve-se criar uma classe que implemente a interface `MetodoPagamento` e passar essa implementação ao construtor de `PedidoService` no `Main`. O contrato deste exemplo é síncrono: retornar um recibo representa pagamento aprovado. Não é necessário alterar o `PedidoService`, pois ele já trabalha com a abstração. Essa extensão demonstra diretamente o princípio Open/Closed.
 
